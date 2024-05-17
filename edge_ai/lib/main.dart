@@ -4,7 +4,7 @@ import 'views/camera_view.dart';
 
 void main() {
   runApp(
-    ProviderScope(
+    const ProviderScope(
       child: MyApp(),
     ),
   );

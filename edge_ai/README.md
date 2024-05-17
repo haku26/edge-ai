@@ -1,16 +1,50 @@
-# edge_ai
+# brand-new edge_ai
 
-A new Flutter project.
+これは、Edge-AIをアーキテクチャを刷新しFlutterで作り直したものである。  
 
-## Getting Started
+## アーキテクチャ説明 by ChatGPT-4o
 
-This project is a starting point for a Flutter application.
+このファイル配置は、クリーンアーキテクチャの原則に基づいています。クリーンアーキテクチャは、アプリケーションのコードを責任ごとに明確に分割し、コードの可読性、再利用性、テストの容易さを向上させることを目的としています。以下に、各ディレクトリの役割と意図を説明します。
 
-A few resources to get you started if this is your first Flutter project:
+アーキテクチャの概要
+- main.dart: アプリケーションのエントリーポイント。アプリ全体の設定や主要なプロバイダの初期化を行います。
+- models: アプリケーションで使用するデータモデルを格納します。ここでは、OCRの結果を保持するためのOcrTextクラスを定義しています。
+- providers: アプリケーションの状態管理を行うプロバイダを格納します。ここでは、Riverpodを使用してOCR結果の状態を管理するためのプロバイダを定義しています。
+- services: ビジネスロジックやデータの処理を行うサービスを格納します。ここでは、MLKitを使用してOCRを実行するサービスを定義しています。
+- views: アプリケーションの主要なUI画面を格納します。ここでは、カメラビューを提供するためのCameraViewを定義しています。
+- widgets: 再利用可能なUIコンポーネントを格納します。ここでは、カメラプレビューとOCR結果のオーバーレイ表示のためのウィジェットを定義しています。
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+各ディレクトリの詳細
+1. main.dart
+アプリケーションのエントリーポイントとして、アプリ全体の設定や主要なプロバイダの初期化を行います。
+ここでは、ProviderScopeを使ってRiverpodのプロバイダのスコープを定義しています。
+2. models/ocr_text.dart
+データモデルを格納するディレクトリです。ここには、OCRの結果を保持するためのOcrTextクラスを定義しています。
+このクラスは、テキストとその位置情報を持つシンプルなデータクラスです。
+3. providers/ocr_provider.dart
+アプリケーションの状態管理を行うプロバイダを格納するディレクトリです。
+ここでは、Riverpodを使用してOCR結果の状態を管理するためのプロバイダを定義しています。
+4. services/mlkit_service.dart
+ビジネスロジックやデータの処理を行うサービスを格納するディレクトリです。
+ここでは、MLKitを使用してOCRを実行するサービスを定義しています。
+このサービスは、CameraViewから呼び出され、リアルタイムで画像を処理してOCR結果を提供します。
+5. views/camera_view.dart
+アプリケーションの主要なUI画面を格納するディレクトリです。
+ここでは、カメラビューを提供するためのCameraViewを定義しています。
+このビューは、カメラプレビューとOCR結果のオーバーレイ表示を組み合わせています。
+6. widgets/
+再利用可能なUIコンポーネントを格納するディレクトリです。
+camera_preview_widget.dart:
+カメラプレビューを表示するためのウィジェットです。
+ocr_text_overlay_widget.dart:
+OCR結果を表示するためのオーバーレイウィジェットです。
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### アーキテクチャの意図
+
+このアーキテクチャの意図は、以下の通りです：
+
+責務の分離: 各ディレクトリは特定の責務を持ち、責任範囲が明確です。これにより、コードの可読性が向上し、メンテナンスが容易になります。
+再利用性: 再利用可能なコンポーネント（ウィジェット）を分離して管理することで、他の部分で再利用が簡単になります。
+テストの容易さ: 各コンポーネントが明確な責務を持つため、ユニットテストやモジュールテストがしやすくなります。
+拡張性: 新しい機能や変更を追加する際に、特定の部分のみを変更すればよいため、拡張が容易です。
+この構造により、コードの整理がされ、拡張性や保守性が向上するアプリケーションを構築することができます。

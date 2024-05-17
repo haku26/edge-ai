@@ -51,7 +51,7 @@ class _CameraViewState extends ConsumerState<CameraView> {
     _cameraController?.startImageStream((CameraImage image) async {
       final inputImage = _convertCameraImage(image);
       final ocrTexts = await _mlKitService.recognizeText(inputImage!);
-      ref.read(ocrTextProvider.state).state = ocrTexts;
+      ref.read(ocrTextProvider.notifier).state = ocrTexts;
     });
 
     setState(() {});
