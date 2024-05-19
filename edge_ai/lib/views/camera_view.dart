@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:edge_ai/models/ocr_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -20,6 +21,7 @@ class CameraView extends ConsumerStatefulWidget {
 class _CameraViewState extends ConsumerState<CameraView> {
   CameraController? _cameraController;
   late MLKitService _mlKitService;
+  Size? _cameraPreviewSize;
 
   final _orientations = {
     DeviceOrientation.portraitUp: 0,
@@ -104,6 +106,17 @@ class _CameraViewState extends ConsumerState<CameraView> {
     );
   }
 
+  Rect _scaleRect(Rect rect, Size imageSize, Size previewSize) {
+    final scaleX = previewSize.width / imageSize.width;
+    final scaleY = previewSize.height / imageSize.height;
+    return Rect.fromLTRB(
+      rect.left * scaleX,
+      rect.top * scaleY,
+      rect.right * scaleX,
+      rect.bottom * scaleY,
+    );
+  }
+
   Uint8List _concatenatePlanes(List<Plane> planes) {
     final WriteBuffer allBytes = WriteBuffer();
     for (Plane plane in planes) {
@@ -127,13 +140,35 @@ class _CameraViewState extends ConsumerState<CameraView> {
     return Scaffold(
       body: Stack(
         children: [
-          CameraPreviewWidget(cameraController: _cameraController!),
-          Consumer(
-            builder: (context, watch, child) {
-              final ocrTexts = ref.watch(ocrTextProvider);
-              return OcrTextOverlayWidget(ocrTexts: ocrTexts);
+          CameraPreviewWidget(
+            cameraController: _cameraController!,
+            onCameraPreviewSize: (size) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    _cameraPreviewSize = size;
+                  });
+                }
+              });
             },
           ),
+          if (_cameraPreviewSize != null)
+            Consumer(
+              builder: (context, watch, child) {
+                final ocrTexts = ref.watch(ocrTextProvider).map((ocrText) {
+                  final scaledRect = _scaleRect(
+                      ocrText.rect,
+                      Size(
+                          _cameraController!.value.previewSize!.height
+                              .toDouble(),
+                          _cameraController!.value.previewSize!.width
+                              .toDouble()),
+                      _cameraPreviewSize!);
+                  return OcrText(rect: scaledRect, text: ocrText.text);
+                }).toList();
+                return OcrTextOverlayWidget(ocrTexts: ocrTexts);
+              },
+            ),
         ],
       ),
     );
