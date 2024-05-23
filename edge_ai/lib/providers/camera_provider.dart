@@ -54,7 +54,9 @@ class CameraControllerNotifier extends StateNotifier<CameraController?> {
   }
 
   Future<void> stopImageStream() async {
-    if (state != null && state!.value.isInitialized) {
+    if (state != null &&
+        state!.value.isInitialized &&
+        state!.value.isStreamingImages) {
       await state!.stopImageStream();
     }
   }
