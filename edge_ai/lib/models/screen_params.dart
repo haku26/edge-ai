@@ -6,9 +6,15 @@ class ScreenParams {
   static late Size screenSize;
   static late Size previewSize;
 
-  static double previewRatio = max(previewSize.height, previewSize.width) /
+  static double get previewRatio =>
+      max(previewSize.height, previewSize.width) /
       min(previewSize.height, previewSize.width);
 
-  static Size screenPreviewSize =
+  static Size get screenPreviewSize =>
       Size(screenSize.width, screenSize.width * previewRatio);
+
+  static void initialize(Size screen, Size preview) {
+    screenSize = screen;
+    previewSize = preview;
+  }
 }

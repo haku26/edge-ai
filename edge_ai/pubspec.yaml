@@ -41,6 +41,7 @@ dependencies:
   tflite_flutter: ^0.10.4
   image: ^4.1.7
   exif: ^3.3.0
+  flutter_hooks: ^0.20.5
 
 dev_dependencies:
   flutter_test:

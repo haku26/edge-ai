@@ -1,6 +1,6 @@
+import 'package:edge_ai/widgets/detector_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'views/camera_view.dart';
 
 void main() {
   runApp(
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const CameraView(),
+      home: const DetectorWidget(),
     );
   }
 }
