@@ -1,47 +1,41 @@
 import 'package:camera/camera.dart';
 import 'package:edge_ai/models/screen_params.dart';
 import 'package:edge_ai/services/image_processor_service.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final cameraControllerProvider =
-    StateNotifierProvider<CameraControllerNotifier, CameraController?>((ref) {
-  return CameraControllerNotifier(ref);
-});
+    NotifierProvider<CameraControllerNotifier, CameraController?>(
+        CameraControllerNotifier.new);
 
 final cameraInitializationStatusProvider = StateProvider<bool>((ref) {
   return false;
 });
 
-class CameraControllerNotifier extends StateNotifier<CameraController?> {
-  final Ref ref;
+class CameraControllerNotifier extends Notifier<CameraController?> {
+  @override
+  CameraController? build() {
+    return null; // 初期状態としてnullを設定
+  }
 
-  CameraControllerNotifier(this.ref) : super(null);
-
-  Future<void> initializeCamera(context) async {
+  Future<void> initializeCamera() async {
     final cameras = await availableCameras();
     final camera = cameras.first;
 
     state = CameraController(
       camera,
-      ResolutionPreset.high,
+      ResolutionPreset.medium,
       enableAudio: false,
     );
 
     await state?.initialize();
     if (state != null && state!.value.isInitialized) {
-      ScreenParams.initialize(
-        MediaQuery.of(context).size,
-        state!.value.previewSize!,
-      );
+      ScreenParams.previewSize = state!.value.previewSize!;
     }
 
     ref.read(cameraInitializationStatusProvider.notifier).state = true;
 
     // Start the image stream
     await startImageStream();
-
-    ScreenParams.previewSize = state!.value.previewSize!;
   }
 
   Future<void> startImageStream() async {
@@ -61,20 +55,19 @@ class CameraControllerNotifier extends StateNotifier<CameraController?> {
     }
   }
 
-  @override
   void dispose() {
     state?.dispose();
-    super.dispose();
   }
 }
 
-final imageStreamProvider =
-    StateNotifierProvider<ImageStreamNotifier, CameraImage?>((ref) {
-  return ImageStreamNotifier();
-});
+final imageStreamProvider = NotifierProvider<ImageStreamNotifier, CameraImage?>(
+    ImageStreamNotifier.new);
 
-class ImageStreamNotifier extends StateNotifier<CameraImage?> {
-  ImageStreamNotifier() : super(null);
+class ImageStreamNotifier extends Notifier<CameraImage?> {
+  @override
+  CameraImage? build() {
+    return null; // 初期状態としてnullを設定
+  }
 
   void update(CameraImage image) {
     state = image;

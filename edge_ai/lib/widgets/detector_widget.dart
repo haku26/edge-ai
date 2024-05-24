@@ -20,7 +20,7 @@ class DetectorWidget extends HookConsumerWidget {
 
     useEffect(() {
       WidgetsBinding.instance.addObserver(_AppLifecycleObserver(ref));
-      ref.read(cameraControllerProvider.notifier).initializeCamera(context);
+      ref.read(cameraControllerProvider.notifier).initializeCamera();
       ref.read(detectorProvider.notifier).start();
       return () {
         WidgetsBinding.instance.removeObserver(_AppLifecycleObserver(ref));
@@ -38,16 +38,31 @@ class DetectorWidget extends HookConsumerWidget {
     }
 
     var aspect = 1 / cameraController.value.aspectRatio;
+    // 任意の幅
+    var width = MediaQuery.sizeOf(context).width;
+    var height = MediaQuery.sizeOf(context).width;
 
     return Stack(
       children: [
-        AspectRatio(
-          aspectRatio: aspect,
-          child: CameraPreview(cameraController),
+        Center(
+          child: SizedBox(
+            width: width,
+            height: height, // 任意の高さ
+            child: AspectRatio(
+              aspectRatio: aspect,
+              child: CameraPreview(cameraController),
+            ),
+          ),
         ),
-        AspectRatio(
-          aspectRatio: aspect,
-          child: _boundingBoxes(recognitions),
+        Center(
+          child: SizedBox(
+            width: width, // 任意の幅
+            height: height, // 任意の高さ
+            child: AspectRatio(
+              aspectRatio: aspect,
+              child: _boundingBoxes(recognitions),
+            ),
+          ),
         ),
       ],
     );

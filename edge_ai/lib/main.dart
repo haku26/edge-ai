@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Camera OCR',
+      title: 'Flutter Edge-AI Camera',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
