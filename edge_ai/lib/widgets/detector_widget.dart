@@ -39,15 +39,17 @@ class DetectorWidget extends HookConsumerWidget {
 
     var aspect = 1 / cameraController.value.aspectRatio;
     // 任意の幅
-    var width = MediaQuery.sizeOf(context).width;
-    var height = MediaQuery.sizeOf(context).width;
+    // var width = MediaQuery.sizeOf(context).width;
+    // var height = MediaQuery.sizeOf(context).height;
+    var width = cameraController.value.previewSize?.width;
+    var height = cameraController.value.previewSize?.height;
 
     return Stack(
       children: [
         Center(
           child: SizedBox(
             width: width,
-            height: height, // 任意の高さ
+            height: height,
             child: AspectRatio(
               aspectRatio: aspect,
               child: CameraPreview(cameraController),

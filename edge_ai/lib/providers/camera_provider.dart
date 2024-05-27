@@ -41,7 +41,6 @@ class CameraControllerNotifier extends Notifier<CameraController?> {
   Future<void> startImageStream() async {
     if (state != null && state!.value.isInitialized) {
       await state!.startImageStream((CameraImage image) {
-        ref.read(imageStreamProvider.notifier).update(image);
         ref.read(imageProcessorProvider).processImage(image);
       });
     }
@@ -57,19 +56,5 @@ class CameraControllerNotifier extends Notifier<CameraController?> {
 
   void dispose() {
     state?.dispose();
-  }
-}
-
-final imageStreamProvider = NotifierProvider<ImageStreamNotifier, CameraImage?>(
-    ImageStreamNotifier.new);
-
-class ImageStreamNotifier extends Notifier<CameraImage?> {
-  @override
-  CameraImage? build() {
-    return null; // 初期状態としてnullを設定
-  }
-
-  void update(CameraImage image) {
-    state = image;
   }
 }
