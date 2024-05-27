@@ -19,9 +19,9 @@ class MainView extends ConsumerWidget {
       home: Scaffold(
         body: IndexedStack(
           index: navigationIndex,
-          children: [
+          children: const [
             HomeView(),
-            const DetectorWidget(),
+            DetectorWidget(),
             // const CameraView()],
             HomeView()
           ],
