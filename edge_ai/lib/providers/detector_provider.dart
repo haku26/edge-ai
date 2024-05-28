@@ -30,8 +30,4 @@ class DetectorNotifier extends Notifier<Detector?> {
     state?.stop();
     _subscription?.cancel();
   }
-
-  void dispose() {
-    stop();
-  }
 }
