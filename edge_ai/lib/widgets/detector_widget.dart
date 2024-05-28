@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:edge_ai/models/screen_params.dart';
+import 'package:edge_ai/services/object_detector_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:edge_ai/models/recognition.dart';
@@ -17,6 +18,7 @@ class DetectorWidget extends HookConsumerWidget {
     final cameraController = ref.watch(cameraControllerProvider);
     final recognitions = ref.watch(recognitionProvider);
     final isCameraInitialized = ref.watch(cameraInitializationStatusProvider);
+    ref.read(detectorProvider.notifier).setObjectDetector();
 
     useEffect(() {
       WidgetsBinding.instance.addObserver(_AppLifecycleObserver(ref));
@@ -93,6 +95,7 @@ class _AppLifecycleObserver extends WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         ref.read(cameraControllerProvider.notifier).startImageStream();
+        // 非同期処理でObjectDetectorを作成し、開始する
         ref.read(detectorProvider.notifier).start();
         break;
       default:

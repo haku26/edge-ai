@@ -1,12 +1,9 @@
-// Copyright 2023 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
 import 'package:camera/camera.dart';
+import 'package:edge_ai/services/detector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as image_lib;
@@ -44,36 +41,17 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-/// All the command codes that can be sent and received between [ObjectDetector] and
-/// [_DetectorServer].
-enum _Codes {
-  init,
-  busy,
-  ready,
-  detect,
-  result,
-}
-
-/// A command sent between [ObjectDetector] and [_DetectorServer].
-class _Command {
-  const _Command(this.code, {this.args});
-
-  final _Codes code;
-  final List<Object>? args;
-}
-
-/// A Simple Detector that handles object detection via Service
 ///
 /// All the heavy operations like pre-processing, detection, ets,
 /// are executed in a background isolate.
 /// This class just sends and receives messages to the isolate.
-class ObjectDetector {
+class ObjectDetector implements Detector {
   static const String _modelPath = 'assets/models/ssd_mobilenet.tflite';
   static const String _labelPath = 'assets/models/labelmap.txt';
 
   ObjectDetector._(this._isolate, this._interpreter, this._labels);
 
-  final Isolate _isolate;
+  Isolate _isolate;
   late final Interpreter _interpreter;
   late final List<String> _labels;
 
@@ -84,23 +62,26 @@ class ObjectDetector {
 
   // // Similarly, StreamControllers are stored in a queue so they can be handled
   // // asynchronously and serially.
-  final StreamController<Map<String, dynamic>> resultsStream =
+  final StreamController<Map<String, dynamic>> _resultsStreamController =
       StreamController<Map<String, dynamic>>();
 
-  /// Open the database at [path] and launch the server on a background isolate..
-  static Future<ObjectDetector> start() async {
+  @override
+  Stream<Map<String, dynamic>> get resultsStream =>
+      _resultsStreamController.stream;
+
+  static Future<Detector?> start() async {
     final ReceivePort receivePort = ReceivePort();
     // sendPort - To be used by service Isolate to send message to our ReceiverPort
     final Isolate isolate =
         await Isolate.spawn(_DetectorServer._run, receivePort.sendPort);
 
-    final ObjectDetector result = ObjectDetector._(
+    final Detector result = ObjectDetector._(
       isolate,
       await _loadModel(),
       await _loadLabels(),
     );
     receivePort.listen((message) {
-      result._handleCommand(message as _Command);
+      result.handleCommand(message as DetectCommand);
     });
     return result;
   }
@@ -126,15 +107,17 @@ class ObjectDetector {
   /// Starts CameraImage processing
   void processFrame(CameraImage cameraImage) {
     if (_isReady) {
-      _sendPort.send(_Command(_Codes.detect, args: [cameraImage]));
+      _sendPort
+          .send(DetectCommand(DetectServerCodes.detect, args: [cameraImage]));
     }
   }
 
   /// Handler invoked when a message is received from the port communicating
   /// with the database server.
-  void _handleCommand(_Command command) {
+  @override
+  void handleCommand(DetectCommand command) {
     switch (command.code) {
-      case _Codes.init:
+      case DetectServerCodes.init:
         _sendPort = command.args?[0] as SendPort;
         // ----------------------------------------------------------------------
         // Before using platform channels and plugins from background isolates we
@@ -143,18 +126,18 @@ class ObjectDetector {
         // invoke [BackgroundIsolateBinaryMessenger.ensureInitialized].
         // ----------------------------------------------------------------------
         RootIsolateToken rootIsolateToken = RootIsolateToken.instance!;
-        _sendPort.send(_Command(_Codes.init, args: [
+        _sendPort.send(DetectCommand(DetectServerCodes.init, args: [
           rootIsolateToken,
           _interpreter.address,
           _labels,
         ]));
-      case _Codes.ready:
+      case DetectServerCodes.ready:
         _isReady = true;
-      case _Codes.busy:
+      case DetectServerCodes.busy:
         _isReady = false;
-      case _Codes.result:
+      case DetectServerCodes.result:
         _isReady = true;
-        resultsStream.add(command.args?[0] as Map<String, dynamic>);
+        _resultsStreamController.add(command.args?[0] as Map<String, dynamic>);
       default:
         debugPrint('Detector unrecognized command: ${command.code}');
     }
@@ -192,17 +175,18 @@ class _DetectorServer {
     ReceivePort receivePort = ReceivePort();
     final _DetectorServer server = _DetectorServer(sendPort);
     receivePort.listen((message) async {
-      final _Command command = message as _Command;
+      final DetectCommand command = message as DetectCommand;
       await server._handleCommand(command);
     });
     // receivePort.sendPort - used by UI isolate to send commands to the service receiverPort
-    sendPort.send(_Command(_Codes.init, args: [receivePort.sendPort]));
+    sendPort.send(
+        DetectCommand(DetectServerCodes.init, args: [receivePort.sendPort]));
   }
 
   /// Handle the [command] received from the [ReceivePort].
-  Future<void> _handleCommand(_Command command) async {
+  Future<void> _handleCommand(DetectCommand command) async {
     switch (command.code) {
-      case _Codes.init:
+      case DetectServerCodes.init:
         // ----------------------------------------------------------------------
         // The [RootIsolateToken] is required for
         // [BackgroundIsolateBinaryMessenger.ensureInitialized] and must be
@@ -220,9 +204,9 @@ class _DetectorServer {
         BackgroundIsolateBinaryMessenger.ensureInitialized(rootIsolateToken);
         _interpreter = Interpreter.fromAddress(command.args?[1] as int);
         _labels = command.args?[2] as List<String>;
-        _sendPort.send(const _Command(_Codes.ready));
-      case _Codes.detect:
-        _sendPort.send(const _Command(_Codes.busy));
+        _sendPort.send(const DetectCommand(DetectServerCodes.ready));
+      case DetectServerCodes.detect:
+        _sendPort.send(const DetectCommand(DetectServerCodes.busy));
         _convertCameraImage(command.args?[0] as CameraImage);
       default:
         debugPrint('_DetectorService unrecognized command ${command.code}');
@@ -239,7 +223,8 @@ class _DetectorServer {
         }
 
         final results = analyseImage(image, preConversionTime);
-        _sendPort.send(_Command(_Codes.result, args: [results]));
+        _sendPort
+            .send(DetectCommand(DetectServerCodes.result, args: [results]));
       }
     });
   }
