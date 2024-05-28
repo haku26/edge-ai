@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:edge_ai/models/screen_params.dart';
-import 'package:edge_ai/services/image_processor_service.dart';
+import 'package:edge_ai/providers/detector_provider.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final cameraControllerProvider =
@@ -41,7 +41,7 @@ class CameraControllerNotifier extends Notifier<CameraController?> {
   Future<void> startImageStream() async {
     if (state != null && state!.value.isInitialized) {
       await state!.startImageStream((CameraImage image) {
-        ref.read(imageProcessorProvider).processImage(image);
+        ref.read(detectorProvider)?.processFrame(image);
       });
     }
   }
