@@ -44,7 +44,7 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-/// All the command codes that can be sent and received between [Detector] and
+/// All the command codes that can be sent and received between [ObjectDetector] and
 /// [_DetectorServer].
 enum _Codes {
   init,
@@ -54,7 +54,7 @@ enum _Codes {
   result,
 }
 
-/// A command sent between [Detector] and [_DetectorServer].
+/// A command sent between [ObjectDetector] and [_DetectorServer].
 class _Command {
   const _Command(this.code, {this.args});
 
@@ -67,11 +67,11 @@ class _Command {
 /// All the heavy operations like pre-processing, detection, ets,
 /// are executed in a background isolate.
 /// This class just sends and receives messages to the isolate.
-class Detector {
+class ObjectDetector {
   static const String _modelPath = 'assets/models/ssd_mobilenet.tflite';
   static const String _labelPath = 'assets/models/labelmap.txt';
 
-  Detector._(this._isolate, this._interpreter, this._labels);
+  ObjectDetector._(this._isolate, this._interpreter, this._labels);
 
   final Isolate _isolate;
   late final Interpreter _interpreter;
@@ -88,13 +88,13 @@ class Detector {
       StreamController<Map<String, dynamic>>();
 
   /// Open the database at [path] and launch the server on a background isolate..
-  static Future<Detector> start() async {
+  static Future<ObjectDetector> start() async {
     final ReceivePort receivePort = ReceivePort();
     // sendPort - To be used by service Isolate to send message to our ReceiverPort
     final Isolate isolate =
         await Isolate.spawn(_DetectorServer._run, receivePort.sendPort);
 
-    final Detector result = Detector._(
+    final ObjectDetector result = ObjectDetector._(
       isolate,
       await _loadModel(),
       await _loadLabels(),
@@ -166,7 +166,7 @@ class Detector {
   }
 }
 
-/// The portion of the [Detector] that runs on the background isolate.
+/// The portion of the [ObjectDetector] that runs on the background isolate.
 ///
 /// This is where we use the new feature Background Isolate Channels, which
 /// allows us to use plugins from background isolates.
