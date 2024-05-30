@@ -17,12 +17,12 @@ class DetectorWidget extends HookConsumerWidget {
     final cameraController = ref.watch(cameraControllerProvider);
     final recognitions = ref.watch(recognitionProvider);
     final isCameraInitialized = ref.watch(cameraInitializationStatusProvider);
-    ref.read(detectorProvider.notifier).setObjectDetector();
 
     useEffect(() {
       WidgetsBinding.instance.addObserver(_AppLifecycleObserver(ref));
       ref.read(cameraControllerProvider.notifier).initializeCamera();
       ref.read(detectorProvider.notifier).start();
+      ref.read(detectorProvider.notifier).setObjectDetector();
       return () {
         WidgetsBinding.instance.removeObserver(_AppLifecycleObserver(ref));
         ref.read(detectorProvider.notifier).stop();
