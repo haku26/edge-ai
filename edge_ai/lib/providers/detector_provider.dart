@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:edge_ai/models/recognition.dart';
 import 'package:edge_ai/services/detector.dart';
 import 'package:edge_ai/services/object_detector_service.dart';
+import 'package:edge_ai/services/ocr_service.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final recognitionProvider = StateProvider<List<Recognition>?>((ref) => null);
@@ -39,6 +40,14 @@ class DetectorNotifier extends Notifier<Detector?> {
 
   Future<void> setObjectDetector() async {
     state = await ObjectDetector.start();
+    _subscription = state?.resultsStream.listen((values) {
+      ref.read(recognitionProvider.notifier).state = values['recognitions'];
+      ref.read(statsProvider.notifier).state = values['stats'];
+    });
+  }
+
+  Future<void> setTextDetector() async {
+    state = await OcrService.start();
     _subscription = state?.resultsStream.listen((values) {
       ref.read(recognitionProvider.notifier).state = values['recognitions'];
       ref.read(statsProvider.notifier).state = values['stats'];
