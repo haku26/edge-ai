@@ -22,7 +22,7 @@ class DetectorWidget extends HookConsumerWidget {
       WidgetsBinding.instance.addObserver(_AppLifecycleObserver(ref));
       ref.read(cameraControllerProvider.notifier).initializeCamera();
       ref.read(detectorProvider.notifier).start();
-      ref.read(detectorProvider.notifier).setObjectDetector();
+      ref.read(detectorProvider.notifier).setOcrService();
       return () {
         WidgetsBinding.instance.removeObserver(_AppLifecycleObserver(ref));
         ref.read(detectorProvider.notifier).stop();

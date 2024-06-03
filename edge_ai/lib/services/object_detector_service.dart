@@ -47,6 +47,7 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 /// This class just sends and receives messages to the isolate.
 class ObjectDetector implements Detector {
   static const String _modelPath = 'assets/models/ssd_mobilenet.tflite';
+  //static const String _modelPath = 'assets/models/ssd_mobilenet.tflite';
   static const String _labelPath = 'assets/models/labelmap.txt';
 
   ObjectDetector._(this._isolate, this._interpreter, this._labels);

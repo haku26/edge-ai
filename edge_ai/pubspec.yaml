@@ -76,7 +76,7 @@ flutter:
     - assets/models/labelmap.txt
     - assets/models/ssd_mobilenet.tflite
     - assets/models/east-text-detector-dr.tflite
-    - assets/models/keras-ocr-dr.tflite
+    - assets/models/keras-ocr-fp16.tflite
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
