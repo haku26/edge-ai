@@ -18,7 +18,7 @@ class OcrService implements Detector {
 
   OcrService._(this._isolate, this._interpreter, this._labels);
 
-  Isolate _isolate;
+  final Isolate _isolate;
   late final Interpreter _interpreter;
   late final List<String> _labels;
 
@@ -72,6 +72,7 @@ class OcrService implements Detector {
   }
 
   /// Starts CameraImage processing
+  @override
   void processFrame(CameraImage cameraImage) {
     if (_isReady) {
       _sendPort

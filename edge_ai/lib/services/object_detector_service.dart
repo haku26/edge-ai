@@ -106,6 +106,7 @@ class ObjectDetector implements Detector {
   }
 
   /// Starts CameraImage processing
+  @override
   void processFrame(CameraImage cameraImage) {
     if (_isReady) {
       _sendPort
