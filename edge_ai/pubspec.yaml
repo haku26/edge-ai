@@ -43,7 +43,6 @@ dependencies:
   exif: ^3.3.0
   flutter_hooks: ^0.20.5
   freezed_annotation: ^2.4.1
-  opencv_dart: ^1.0.4
 
 dev_dependencies:
   flutter_test:
@@ -78,7 +77,6 @@ flutter:
     - assets/models/ssd_mobilenet.tflite
     - assets/models/east-text-detector-dr.tflite
     - assets/models/keras-ocr-dr.tflite
-    - assets/labels/ocr-label.txt
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
