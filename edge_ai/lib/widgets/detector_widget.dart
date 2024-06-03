@@ -1,6 +1,5 @@
 import 'package:camera/camera.dart';
 import 'package:edge_ai/models/screen_params.dart';
-import 'package:edge_ai/services/object_detector_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:edge_ai/models/recognition.dart';

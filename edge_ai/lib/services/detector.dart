@@ -9,8 +9,6 @@ abstract class Detector {
 
   void stop();
   void processFrame(CameraImage cameraImage);
-
-  void handleCommand(DetectCommand message) {}
 }
 
 /// A command sent between [ObjectDetector] and [_DetectorServer].

@@ -75,7 +75,7 @@ class ObjectDetector implements Detector {
     final Isolate isolate =
         await Isolate.spawn(_DetectorServer._run, receivePort.sendPort);
 
-    final Detector result = ObjectDetector._(
+    final ObjectDetector result = ObjectDetector._(
       isolate,
       await _loadModel(),
       await _loadLabels(),
@@ -83,7 +83,7 @@ class ObjectDetector implements Detector {
     receivePort.listen((message) {
       result.handleCommand(message as DetectCommand);
     });
-    return result;
+    return result as Detector;
   }
 
   static Future<Interpreter> _loadModel() async {
@@ -114,7 +114,6 @@ class ObjectDetector implements Detector {
 
   /// Handler invoked when a message is received from the port communicating
   /// with the database server.
-  @override
   void handleCommand(DetectCommand command) {
     switch (command.code) {
       case DetectServerCodes.init:
